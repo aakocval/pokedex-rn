@@ -1,14 +1,13 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Image } from 'expo-image';
+import { useAppCoordinator } from '@/navigation/useAppCoordinator';
+import { useDetailViewModel } from '@/viewmodels/useDetailViewModel';
 import { Ionicons } from '@expo/vector-icons';
+import { Image } from 'expo-image';
+import { useLocalSearchParams } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
 import Animated, { FadeIn } from 'react-native-reanimated';
-import { fetchPokemonDetailFull } from '@/services/pokeapi';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { TYPE_DETAIL_COLORS } from '@/constants/typeColors';
-import type { PokemonDetailFull } from '@/types/pokemon';
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -16,17 +15,8 @@ function capitalize(s: string) {
 
 export default function PokemonDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
-  const [detail, setDetail] = useState<PokemonDetailFull | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (!id) return;
-    fetchPokemonDetailFull(Number(id))
-      .then(setDetail)
-      .catch(console.error)
-      .finally(() => setIsLoading(false));
-  }, [id]);
+  const { goBack } = useAppCoordinator();
+  const { detail, isLoading } = useDetailViewModel(Number(id));
 
   const bgColor = TYPE_DETAIL_COLORS[detail?.primaryType ?? ''] ?? '#3D5060';
 
@@ -49,7 +39,7 @@ export default function PokemonDetailScreen() {
           </View>
         ) : (
           <Animated.View style={styles.content} entering={FadeIn.duration(300)}>
-            <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
+            <Pressable style={styles.backBtn} onPress={goBack} hitSlop={12}>
               <Ionicons name="arrow-back" size={24} color="rgba(255,255,255,0.85)" />
             </Pressable>
 

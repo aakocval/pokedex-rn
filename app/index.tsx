@@ -3,12 +3,10 @@ import { PokemonCard } from '@/components/PokemonCard';
 import type { AppColors } from '@/constants/colors';
 import { TYPE_COLORS, TYPE_DETAIL_COLORS } from '@/constants/typeColors';
 import { useTheme } from '@/context/ThemeContext';
-import { useFilter } from '@/hooks/useFilter';
-import { usePokemonList } from '@/hooks/usePokemonList';
-import { useSearch } from '@/hooks/useSearch';
+import { useAppCoordinator } from '@/navigation/useAppCoordinator';
 import type { Pokemon } from '@/types/pokemon';
+import { useHomeViewModel } from '@/viewmodels/useHomeViewModel';
 import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { useMemo } from 'react';
 import {
@@ -31,52 +29,21 @@ import Animated, {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 export default function HomeScreen() {
-  const router = useRouter();
   const { colors, isDark, toggleTheme } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
+  const { openPokemonDetail } = useAppCoordinator();
+  const vm = useHomeViewModel();
 
-  const { pokemon, isLoading, isFetchingMore, error, refresh, fetchNextPage } =
-    usePokemonList();
-  const { query, setQuery, results, isSearching, notFound, isActive: isSearchActive } =
-    useSearch();
-  const {
-    selectedType,
-    filteredPokemon,
-    isFiltering,
-    isSheetOpen,
-    isActive: isFilterActive,
-    applyFilter,
-    clearFilter,
-    openSheet,
-    closeSheet,
-  } = useFilter();
-
-  // Priority: search > filter > paginated list
-  // When both active, narrow search results by selected type
-  let listData: Pokemon[];
-  if (isSearchActive) {
-    listData = isFilterActive
-      ? results.filter((p) => p.primaryType === selectedType)
-      : results;
-  } else if (isFilterActive) {
-    listData = filteredPokemon;
-  } else {
-    listData = pokemon;
-  }
-
-  const isPaginatedMode = !isSearchActive && !isFilterActive;
-  const isBusy = isSearching || isFiltering;
-
-  if (isLoading && isPaginatedMode) {
+  if (vm.isLoading && vm.isPaginatedMode) {
     return (
       <SafeAreaView style={styles.container} edges={['top']}>
         <StatusBar style={isDark ? 'light' : 'dark'} />
         <Header
-          query={query}
-          onQueryChange={setQuery}
-          isFilterActive={isFilterActive}
-          selectedType={selectedType}
-          onFilterPress={openSheet}
+          query={vm.query}
+          onQueryChange={vm.setQuery}
+          isFilterActive={vm.isFilterActive}
+          selectedType={vm.selectedType}
+          onFilterPress={vm.openSheet}
           isDark={isDark}
           onThemeToggle={toggleTheme}
         />
@@ -91,54 +58,54 @@ export default function HomeScreen() {
     <SafeAreaView style={styles.container} edges={['top']}>
       <StatusBar style={isDark ? 'light' : 'dark'} />
       <Header
-        query={query}
-        onQueryChange={setQuery}
-        isFilterActive={isFilterActive}
-        selectedType={selectedType}
-        onFilterPress={openSheet}
+        query={vm.query}
+        onQueryChange={vm.setQuery}
+        isFilterActive={vm.isFilterActive}
+        selectedType={vm.selectedType}
+        onFilterPress={vm.openSheet}
         isDark={isDark}
         onThemeToggle={toggleTheme}
       />
 
-      {isFilterActive && !isSearchActive && (
+      {vm.isFilterActive && !vm.isSearchActive && (
         <Animated.View entering={FadeInDown.duration(250).springify()} exiting={FadeOutUp.duration(180)}>
-          <ActiveFilterBadge type={selectedType!} onClear={clearFilter} />
+          <ActiveFilterBadge type={vm.selectedType!} onClear={vm.clearFilter} />
         </Animated.View>
       )}
 
-      {isBusy ? (
+      {vm.isBusy ? (
         <View style={styles.center}>
           <ActivityIndicator size="large" color={colors.filterBtn} />
         </View>
-      ) : notFound && isSearchActive ? (
+      ) : vm.notFound && vm.isSearchActive ? (
         <View style={styles.center}>
-          <Text style={styles.notFoundText}>No Pokémon found for "{query}"</Text>
+          <Text style={styles.notFoundText}>No Pokémon found for "{vm.query}"</Text>
           <Text style={styles.notFoundHint}>Try a partial name or Pokédex number</Text>
         </View>
-      ) : error && isPaginatedMode ? (
+      ) : vm.error && vm.isPaginatedMode ? (
         <View style={styles.center}>
-          <Text style={styles.errorText}>{error}</Text>
+          <Text style={styles.errorText}>{vm.error}</Text>
         </View>
       ) : (
         <FlatList<Pokemon>
-          key={isSearchActive ? 'search' : isFilterActive ? 'filter' : 'list'}
-          data={listData}
+          key={vm.isSearchActive ? 'search' : vm.isFilterActive ? 'filter' : 'list'}
+          data={vm.listData}
           keyExtractor={(item) => String(item.id)}
           numColumns={2}
           contentContainerStyle={styles.list}
           renderItem={({ item }) => (
             <PokemonCard
               pokemon={item}
-              onPress={() => router.push(`/pokemon/${item.id}`)}
+              onPress={() => openPokemonDetail(item.id)}
             />
           )}
           keyboardDismissMode="on-drag"
-          onEndReached={isPaginatedMode ? fetchNextPage : undefined}
+          onEndReached={vm.isPaginatedMode ? vm.fetchNextPage : undefined}
           onEndReachedThreshold={0.5}
-          onRefresh={isPaginatedMode ? refresh : undefined}
-          refreshing={isPaginatedMode && isLoading}
+          onRefresh={vm.isPaginatedMode ? vm.refresh : undefined}
+          refreshing={vm.isPaginatedMode && vm.isLoading}
           ListFooterComponent={
-            isPaginatedMode && isFetchingMore ? (
+            vm.isPaginatedMode && vm.isFetchingMore ? (
               <ActivityIndicator style={styles.footer} color={colors.filterBtn} />
             ) : null
           }
@@ -146,10 +113,10 @@ export default function HomeScreen() {
       )}
 
       <FilterSheet
-        visible={isSheetOpen}
-        selectedType={selectedType}
-        onSelect={applyFilter}
-        onClose={closeSheet}
+        visible={vm.isSheetOpen}
+        selectedType={vm.selectedType}
+        onSelect={vm.applyFilter}
+        onClose={vm.closeSheet}
       />
     </SafeAreaView>
   );
