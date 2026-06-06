@@ -1,50 +1,88 @@
-# Welcome to your Expo app 👋
+# Pokédex
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A React Native Pokédex app built with Expo that lets you browse, search, and explore Pokémon from the [PokéAPI](https://pokeapi.co/).
 
-## Get started
+<p align="center">
+  <img src="assets/images/demo.gif" alt="Pokédex demo" width="320" />
+</p>
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## Features
 
-2. Start the app
+- **Browse** — paginated grid of all Pokémon, color-coded by primary type
+- **Search** — real-time name search with partial-match support
+- **Filter by type** — bottom-sheet type picker with an active-filter badge
+- **Detail view** — full-screen card with Pokédex number, name, height, weight, Japanese name, and region label
+- **Light / dark mode** — toggleable theme with animated icon transition
+- **Smooth animations** — fade-in/out transitions and spring-based interactions via React Native Reanimated
 
-   ```bash
-   npx expo start
-   ```
+## Screens
 
-In the output, you'll find options to open the app in a
+| Home | Detail |
+|------|--------|
+| Paginated Pokémon grid with search and type filter | Type-colored full-screen detail with stats and artwork |
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## Tech Stack
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+| Layer | Library |
+|-------|---------|
+| Framework | [Expo](https://expo.dev) ~54 |
+| Navigation | [Expo Router](https://expo.github.io/router) (file-based) |
+| Animations | [React Native Reanimated](https://docs.swmansion.com/react-native-reanimated/) ~4 |
+| Images | [expo-image](https://docs.expo.dev/versions/latest/sdk/image/) |
+| Icons | [@expo/vector-icons](https://icons.expo.fyi/) |
+| Data | [PokéAPI](https://pokeapi.co/) |
+| Testing | Jest + jest-expo |
 
-## Get a fresh project
+## Getting Started
 
-When you're ready, run:
+### Prerequisites
+
+- Node.js 18+
+- [Expo CLI](https://docs.expo.dev/more/expo-cli/)
+
+### Install
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### Run
 
-## Learn more
+```bash
+npx expo start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Then open the app in an iOS simulator, Android emulator, or Expo Go.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+| Command | Target |
+|---------|--------|
+| `npm run ios` | iOS simulator |
+| `npm run android` | Android emulator |
+| `npm run web` | Web browser |
 
-## Join the community
+### Tests
 
-Join our community of developers creating universal apps.
+```bash
+npm test
+```
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+## Project Structure
+
+```
+app/
+  index.tsx          # Home screen (list + search + filter)
+  pokemon/[id].tsx   # Detail screen
+components/          # Shared UI components
+viewmodels/          # Business logic hooks
+services/            # PokéAPI data layer
+constants/           # Colors, type palette
+context/             # Theme context
+navigation/          # App coordinator
+types/               # TypeScript types
+```
+
+## Data Source
+
+All Pokémon data is fetched from the public [PokéAPI v2](https://pokeapi.co/). No API key required.
