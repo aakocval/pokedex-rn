@@ -6,7 +6,7 @@ import Animated, {
   useSharedValue,
   withSpring,
 } from 'react-native-reanimated';
-import { TYPE_COLORS, POKEMON_TYPES, type PokemonTypeName } from '@/constants/typeColors';
+import { TYPE_COLORS, TYPE_DETAIL_COLORS, POKEMON_TYPES, type PokemonTypeName } from '@/constants/typeColors';
 import type { AppColors } from '@/constants/colors';
 import { useTheme } from '@/context/ThemeContext';
 
@@ -40,7 +40,7 @@ function TypeChip({ type, isSelected, onPress, styles, colors }: TypeChipProps) 
       <Pressable
         style={[
           styles.chip,
-          { backgroundColor: TYPE_COLORS[type] },
+          { backgroundColor: TYPE_DETAIL_COLORS[type] },
           isSelected && styles.chipSelected,
         ]}
         onPressIn={() => { scale.value = withSpring(0.9, { damping: 10, stiffness: 350 }); }}
@@ -153,12 +153,12 @@ function makeStyles(colors: AppColors) {
       borderColor: 'transparent',
     },
     chipSelected: {
-      borderColor: colors.chipSelectedBorder,
+      borderColor: 'rgba(255,255,255,0.85)',
     },
     chipText: {
       fontSize: 13,
       fontWeight: '600',
-      color: colors.text,
+      color: '#fff',
     },
     chipTextSelected: {
       fontWeight: '800',

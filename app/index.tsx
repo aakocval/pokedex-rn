@@ -1,7 +1,7 @@
 import { FilterSheet } from '@/components/FilterSheet';
 import { PokemonCard } from '@/components/PokemonCard';
 import type { AppColors } from '@/constants/colors';
-import { TYPE_COLORS } from '@/constants/typeColors';
+import { TYPE_COLORS, TYPE_DETAIL_COLORS } from '@/constants/typeColors';
 import { useTheme } from '@/context/ThemeContext';
 import { useFilter } from '@/hooks/useFilter';
 import { usePokemonList } from '@/hooks/usePokemonList';
@@ -75,6 +75,7 @@ export default function HomeScreen() {
           query={query}
           onQueryChange={setQuery}
           isFilterActive={isFilterActive}
+          selectedType={selectedType}
           onFilterPress={openSheet}
           isDark={isDark}
           onThemeToggle={toggleTheme}
@@ -93,6 +94,7 @@ export default function HomeScreen() {
         query={query}
         onQueryChange={setQuery}
         isFilterActive={isFilterActive}
+        selectedType={selectedType}
         onFilterPress={openSheet}
         isDark={isDark}
         onThemeToggle={toggleTheme}
@@ -157,12 +159,13 @@ interface HeaderProps {
   query: string;
   onQueryChange: (text: string) => void;
   isFilterActive: boolean;
+  selectedType: string | null;
   onFilterPress: () => void;
   isDark: boolean;
   onThemeToggle: () => void;
 }
 
-function Header({ query, onQueryChange, isFilterActive, onFilterPress, isDark, onThemeToggle }: HeaderProps) {
+function Header({ query, onQueryChange, isFilterActive, selectedType, onFilterPress, isDark, onThemeToggle }: HeaderProps) {
   const { colors } = useTheme();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
@@ -179,6 +182,12 @@ function Header({ query, onQueryChange, isFilterActive, onFilterPress, isDark, o
     onThemeToggle();
   };
 
+  const filterBtnBg = isFilterActive && selectedType
+    ? (TYPE_DETAIL_COLORS[selectedType] ?? colors.filterBtnActive)
+    : colors.surface;
+  const filterBtnBorder = isFilterActive ? 'transparent' : colors.border;
+  const filterIconColor = isFilterActive ? '#fff' : colors.textSecondary;
+
   return (
     <View style={styles.header}>
       <View style={styles.titleRow}>
@@ -194,7 +203,7 @@ function Header({ query, onQueryChange, isFilterActive, onFilterPress, isDark, o
         </Pressable>
       </View>
       <Text style={styles.subtitle}>
-        Search for a Pokémon by name or using its National Pokédex number.
+        Search for a Pokémon by name.
       </Text>
       <View style={styles.searchRow}>
         <View style={styles.searchBar}>
@@ -202,7 +211,7 @@ function Header({ query, onQueryChange, isFilterActive, onFilterPress, isDark, o
           <TextInput
             value={query}
             onChangeText={onQueryChange}
-            placeholder="Search by name"
+            placeholder="Search..."
             placeholderTextColor={colors.textHint}
             style={styles.input}
             autoCapitalize="none"
@@ -212,10 +221,10 @@ function Header({ query, onQueryChange, isFilterActive, onFilterPress, isDark, o
           />
         </View>
         <Pressable
-          style={[styles.filterBtn, isFilterActive && styles.filterBtnActive]}
+          style={[styles.filterBtn, { backgroundColor: filterBtnBg, borderColor: filterBtnBorder }]}
           onPress={onFilterPress}
         >
-          <Ionicons name="options-outline" size={22} color="#fff" />
+          <Ionicons name="options-outline" size={22} color={filterIconColor} />
           {isFilterActive && <View style={styles.filterDot} />}
         </Pressable>
       </View>
@@ -312,13 +321,10 @@ function makeStyles(colors: AppColors) {
     filterBtn: {
       width: 46,
       height: 46,
-      backgroundColor: colors.filterBtn,
       borderRadius: 14,
+      borderWidth: 1.5,
       justifyContent: 'center',
       alignItems: 'center',
-    },
-    filterBtnActive: {
-      backgroundColor: colors.filterBtnActive,
     },
     filterDot: {
       position: 'absolute',
