@@ -1,13 +1,13 @@
-import { useEffect, useState } from 'react';
-import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
-import { useLocalSearchParams, useRouter } from 'expo-router';
-import { StatusBar } from 'expo-status-bar';
-import { SafeAreaView } from 'react-native-safe-area-context';
-import { Image } from 'expo-image';
+import { useAppCoordinator } from '@/navigation/useAppCoordinator';
+import { useDetailViewModel } from '@/viewmodels/useDetailViewModel';
 import { Ionicons } from '@expo/vector-icons';
-import { fetchPokemonDetailFull } from '@/services/pokeapi';
+import { Image } from 'expo-image';
+import { useLocalSearchParams } from 'expo-router';
+import { StatusBar } from 'expo-status-bar';
+import { ActivityIndicator, Pressable, StyleSheet, Text, View } from 'react-native';
+import Animated, { FadeIn } from 'react-native-reanimated';
+import { SafeAreaView } from 'react-native-safe-area-context';
 import { TYPE_DETAIL_COLORS } from '@/constants/typeColors';
-import type { PokemonDetailFull } from '@/types/pokemon';
 
 function capitalize(s: string) {
   return s.charAt(0).toUpperCase() + s.slice(1);
@@ -15,17 +15,8 @@ function capitalize(s: string) {
 
 export default function PokemonDetailScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
-  const router = useRouter();
-  const [detail, setDetail] = useState<PokemonDetailFull | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  useEffect(() => {
-    if (!id) return;
-    fetchPokemonDetailFull(Number(id))
-      .then(setDetail)
-      .catch(console.error)
-      .finally(() => setIsLoading(false));
-  }, [id]);
+  const { goBack } = useAppCoordinator();
+  const { detail, isLoading } = useDetailViewModel(Number(id));
 
   const bgColor = TYPE_DETAIL_COLORS[detail?.primaryType ?? ''] ?? '#3D5060';
 
@@ -34,15 +25,11 @@ export default function PokemonDetailScreen() {
       <StatusBar style="light" />
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
 
-        {/* Back button */}
-        <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
-          <Ionicons name="arrow-back" size={24} color="rgba(255,255,255,0.85)" />
-        </Pressable>
-
-        {/* Region label — rotated on left edge */}
         {detail && (
           <View style={styles.regionWrapper} pointerEvents="none">
-            <Text style={styles.regionText}>Región: {detail.region}</Text>
+            <View style={styles.regionRotator}>
+              <Text style={styles.regionText}>Región: {detail.region}</Text>
+            </View>
           </View>
         )}
 
@@ -51,12 +38,14 @@ export default function PokemonDetailScreen() {
             <ActivityIndicator size="large" color="rgba(255,255,255,0.7)" />
           </View>
         ) : (
-          <View style={styles.content}>
-            {/* Number + Name */}
+          <Animated.View style={styles.content} entering={FadeIn.duration(300)}>
+            <Pressable style={styles.backBtn} onPress={goBack} hitSlop={12}>
+              <Ionicons name="arrow-back" size={24} color="rgba(255,255,255,0.85)" />
+            </Pressable>
+
             <Text style={styles.number}>#{String(detail.id).padStart(3, '0')}</Text>
             <Text style={styles.name}>{capitalize(detail.name)}</Text>
 
-            {/* Stats */}
             <View style={styles.stats}>
               <Text style={styles.statRow}>
                 Height:{' '}
@@ -68,7 +57,6 @@ export default function PokemonDetailScreen() {
               </Text>
             </View>
 
-            {/* Pokémon image */}
             <Image
               source={{ uri: detail.imageUrl }}
               style={styles.image}
@@ -76,11 +64,10 @@ export default function PokemonDetailScreen() {
               transition={300}
             />
 
-            {/* Japanese name watermark */}
             <Text style={styles.japaneseName} numberOfLines={1} adjustsFontSizeToFit>
               {detail.japaneseName}
             </Text>
-          </View>
+          </Animated.View>
         )}
       </SafeAreaView>
     </View>
@@ -95,16 +82,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backBtn: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    zIndex: 10,
     width: 40,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.15)',
     borderRadius: 12,
+    marginTop: 8,
   },
   regionWrapper: {
     position: 'absolute',
@@ -116,14 +100,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 1,
   },
+  regionRotator: {
+    width: 120,
+    transform: [{ rotate: '-90deg' }],
+  },
   regionText: {
     color: 'rgba(255,255,255,0.65)',
     fontSize: 12,
     fontWeight: '500',
     letterSpacing: 1,
-    width: 130,
     textAlign: 'center',
-    transform: [{ rotate: '-90deg' }],
   },
   center: {
     flex: 1,
@@ -132,7 +118,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingLeft: 52,   // leave room for region label + back button
+    paddingLeft: 44,
     paddingRight: 24,
     paddingTop: 8,
   },
@@ -140,7 +126,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: 'rgba(255,255,255,0.7)',
-    marginTop: 48,
+    marginTop: 16,
   },
   name: {
     fontSize: 40,
