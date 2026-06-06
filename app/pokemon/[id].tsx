@@ -5,6 +5,7 @@ import { StatusBar } from 'expo-status-bar';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Image } from 'expo-image';
 import { Ionicons } from '@expo/vector-icons';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { fetchPokemonDetailFull } from '@/services/pokeapi';
 import { TYPE_DETAIL_COLORS } from '@/constants/typeColors';
 import type { PokemonDetailFull } from '@/types/pokemon';
@@ -34,7 +35,6 @@ export default function PokemonDetailScreen() {
       <StatusBar style="light" />
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
 
-        {/* Region label — rotated on left edge */}
         {detail && (
           <View style={styles.regionWrapper} pointerEvents="none">
             <View style={styles.regionRotator}>
@@ -48,17 +48,14 @@ export default function PokemonDetailScreen() {
             <ActivityIndicator size="large" color="rgba(255,255,255,0.7)" />
           </View>
         ) : (
-          <View style={styles.content}>
-            {/* Back button — in normal flow, aligned with number/name */}
+          <Animated.View style={styles.content} entering={FadeIn.duration(300)}>
             <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
               <Ionicons name="arrow-back" size={24} color="rgba(255,255,255,0.85)" />
             </Pressable>
 
-            {/* Number + Name */}
             <Text style={styles.number}>#{String(detail.id).padStart(3, '0')}</Text>
             <Text style={styles.name}>{capitalize(detail.name)}</Text>
 
-            {/* Stats */}
             <View style={styles.stats}>
               <Text style={styles.statRow}>
                 Height:{' '}
@@ -70,7 +67,6 @@ export default function PokemonDetailScreen() {
               </Text>
             </View>
 
-            {/* Pokémon image */}
             <Image
               source={{ uri: detail.imageUrl }}
               style={styles.image}
@@ -78,11 +74,10 @@ export default function PokemonDetailScreen() {
               transition={300}
             />
 
-            {/* Japanese name watermark */}
             <Text style={styles.japaneseName} numberOfLines={1} adjustsFontSizeToFit>
               {detail.japaneseName}
             </Text>
-          </View>
+          </Animated.View>
         )}
       </SafeAreaView>
     </View>
