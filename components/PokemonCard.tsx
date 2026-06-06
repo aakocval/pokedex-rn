@@ -1,4 +1,4 @@
-import { TYPE_COLORS } from '@/constants/typeColors';
+import { TYPE_DETAIL_COLORS } from '@/constants/typeColors';
 import type { Pokemon } from '@/types/pokemon';
 import { Image } from 'expo-image';
 import { Pressable, StyleSheet, Text } from 'react-native';
@@ -13,7 +13,7 @@ function capitalize(s: string) {
 }
 
 export function PokemonCard({ pokemon, onPress }: Props) {
-  const bgColor = TYPE_COLORS[pokemon.primaryType] ?? TYPE_COLORS.normal;
+  const bgColor = TYPE_DETAIL_COLORS[pokemon.primaryType] ?? TYPE_DETAIL_COLORS.normal;
   const numberStr = String(pokemon.id).padStart(3, '0');
 
   return (
@@ -53,13 +53,13 @@ const styles = StyleSheet.create({
   name: {
     fontSize: 15,
     fontWeight: '700',
-    color: '#1A1A2E',
+    color: '#fff',
     marginTop: 8,
     textAlign: 'center',
   },
   number: {
     fontSize: 13,
-    color: '#555',
+    color: 'rgba(255,255,255,0.7)',
     marginTop: 2,
   },
 });

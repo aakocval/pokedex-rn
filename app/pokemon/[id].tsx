@@ -34,15 +34,12 @@ export default function PokemonDetailScreen() {
       <StatusBar style="light" />
       <SafeAreaView style={styles.safeArea} edges={['top', 'bottom']}>
 
-        {/* Back button */}
-        <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
-          <Ionicons name="arrow-back" size={24} color="rgba(255,255,255,0.85)" />
-        </Pressable>
-
         {/* Region label — rotated on left edge */}
         {detail && (
           <View style={styles.regionWrapper} pointerEvents="none">
-            <Text style={styles.regionText}>Región: {detail.region}</Text>
+            <View style={styles.regionRotator}>
+              <Text style={styles.regionText}>Región: {detail.region}</Text>
+            </View>
           </View>
         )}
 
@@ -52,6 +49,11 @@ export default function PokemonDetailScreen() {
           </View>
         ) : (
           <View style={styles.content}>
+            {/* Back button — in normal flow, aligned with number/name */}
+            <Pressable style={styles.backBtn} onPress={() => router.back()} hitSlop={12}>
+              <Ionicons name="arrow-back" size={24} color="rgba(255,255,255,0.85)" />
+            </Pressable>
+
             {/* Number + Name */}
             <Text style={styles.number}>#{String(detail.id).padStart(3, '0')}</Text>
             <Text style={styles.name}>{capitalize(detail.name)}</Text>
@@ -95,16 +97,13 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   backBtn: {
-    position: 'absolute',
-    top: 16,
-    left: 16,
-    zIndex: 10,
     width: 40,
     height: 40,
     justifyContent: 'center',
     alignItems: 'center',
     backgroundColor: 'rgba(0,0,0,0.15)',
     borderRadius: 12,
+    marginTop: 8,
   },
   regionWrapper: {
     position: 'absolute',
@@ -116,14 +115,16 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     zIndex: 1,
   },
+  regionRotator: {
+    width: 120,
+    transform: [{ rotate: '-90deg' }],
+  },
   regionText: {
     color: 'rgba(255,255,255,0.65)',
     fontSize: 12,
     fontWeight: '500',
     letterSpacing: 1,
-    width: 130,
     textAlign: 'center',
-    transform: [{ rotate: '-90deg' }],
   },
   center: {
     flex: 1,
@@ -132,7 +133,7 @@ const styles = StyleSheet.create({
   },
   content: {
     flex: 1,
-    paddingLeft: 52,   // leave room for region label + back button
+    paddingLeft: 44,
     paddingRight: 24,
     paddingTop: 8,
   },
@@ -140,7 +141,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     color: 'rgba(255,255,255,0.7)',
-    marginTop: 48,
+    marginTop: 16,
   },
   name: {
     fontSize: 40,
