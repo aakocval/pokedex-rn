@@ -3,7 +3,7 @@
 A React Native Pokédex app built with Expo that lets you browse, search, and explore Pokémon from the [PokéAPI](https://pokeapi.co/).
 
 <p align="center">
-  <img src="assets/images/demo.gif" alt="Pokédex demo" width="320" />
+  <img src="assets/images/pokedex.gif" alt="Pokédex demo" width="320" />
 </p>
 
 ---
